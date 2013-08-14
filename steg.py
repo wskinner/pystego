@@ -1,23 +1,32 @@
+#!/usr/bin/python
+
 from PIL import Image
+from optparse import OptionParser
+import fileinput
+from sys import stdout, stdin
 
 class StegImage():
-    def __init__(self, img, compression=1):
+    def __init__(self, img, compression=1, verbose=False):
         self.img = img
         self.bit_index = 0
         self.compression = compression
         self.pixel_modulus = compression * 3
         self.pixels = map(list, img.getdata())
         self.num_header_pixels = 10
+        self.verbose = verbose
 
     def encode(self, msg):
         self.bit_index = 0
         pixels = self.img.getdata()
         num_pixels = self.img.size[0] * self.img.size[1]
-        max_bits = num_pixels * 3 - self.num_header_pixels * 3
+        max_bits = num_pixels * 3 * 8 - self.num_header_pixels * 3 * 8
 
         msg_bits = self.getBits(msg)
         if len(msg_bits) > max_bits:
-            raise Exception('find a bigger photo, fool')
+            print 'Find a bigger photo, fool'
+            return
+        if self.verbose:
+            print 'Using %d of %d available bits' % (len(msg_bits), max_bits)
         
         length = len(msg)*8
         len_bits = self.getNBits(length, self.num_header_pixels*3)
@@ -99,7 +108,6 @@ class StegImage():
         for i in xrange(self.num_header_pixels * 3):
             length_bits.append(self.getNextBit())
         length = self.bitsToInt(length_bits)
-        print 'length_bits', length_bits, length
 
         for i in xrange(length):
             msg_bits.append(self.getNextBit())
@@ -115,3 +123,35 @@ class StegImage():
         self.img = Image.open(name)
         self.pixels = map(list, self.img.getdata())
 
+
+if __name__ == '__main__':
+    parser = OptionParser()
+    parser.add_option('-d', '--decode', help='decode the text hidden in the image', dest='d', action='store')
+    parser.add_option('-v', '--verbose', help='verbose logging', dest='v', action='store_true', default=False)
+    parser.add_option('-i', '--input', help='input filename', dest='i', action='store')
+    parser.add_option('-o', '--output', help='output filename', dest='o', action='store')
+
+    opts, args = parser.parse_args()
+    if opts.d:
+        im = Image.open(opts.d)
+        s = StegImage(im, verbose=opts.v)
+        if opts.o:
+            outfile = open(opts.o, 'w')
+        else:
+            outfile = stdout
+        outfile.write(s.decode())
+        outfile.close()
+    else:
+        msg = None
+        if len(args) > 1:
+            filename = args[1]
+            msg = args[0]
+        else:
+            filename = args[0]
+        im = Image.open(filename)
+        s = StegImage(im, verbose=opts.v)
+        if msg:
+            s.encode(msg)
+        else:
+            s.encode(stdin.read())
+        s.save(opts.o)
