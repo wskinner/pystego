@@ -2,3 +2,7 @@
 venv/*
 *.png
 *.jpg
+temp/*
+*.txt
+*.asc
+

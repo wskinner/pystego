@@ -128,30 +128,18 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option('-d', '--decode', help='decode the text hidden in the image', dest='d', action='store')
     parser.add_option('-v', '--verbose', help='verbose logging', dest='v', action='store_true', default=False)
-    parser.add_option('-i', '--input', help='input filename', dest='i', action='store')
-    parser.add_option('-o', '--output', help='output filename', dest='o', action='store')
-
+    parser.add_option('-c', '--compression', help='how many bits to use (1-8)', dest='c', action='store', default=1)
+    parser.add_option('-o', '--outputfile', help='the name of the encoded image file', dest='o', action='store', default=None)
     opts, args = parser.parse_args()
     if opts.d:
         im = Image.open(opts.d)
         s = StegImage(im, verbose=opts.v)
-        if opts.o:
-            outfile = open(opts.o, 'w')
-        else:
-            outfile = stdout
-        outfile.write(s.decode())
-        outfile.close()
+        stdout.write(s.decode())
     else:
-        msg = None
-        if len(args) > 1:
-            filename = args[1]
-            msg = args[0]
-        else:
-            filename = args[0]
+        filename = args[0]
+        if not opts.o:
+            opts.o = ''.join(filename.split('.')[:-1]) + '-enc.' + filename.split('.')[-1]
         im = Image.open(filename)
-        s = StegImage(im, verbose=opts.v)
-        if msg:
-            s.encode(msg)
-        else:
-            s.encode(stdin.read())
+        s = StegImage(im, compression=opts.c, verbose=opts.v)
+        s.encode(stdin.read())
         s.save(opts.o)
