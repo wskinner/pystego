@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<head>
+	<link type="text/css" rel="stylesheet" href={{ url_for('static', filename='stylesheets/style.css') }} />
+</head>
+{% extends 'base.html' %}
+{% block content %}
+<title>Upload an image </title>
+
+{% if filename %}
+<div id="drop_zone">Drop files here</div>
+<output id="list"></output>
+<script>
+	function handleFileSelect(evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+
+		var files = evt.dataTransfer.files;
+
+		var output = [];
+		for (var i = 0, f; f = files[i]; i++) {
+			output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+			f.size, ' bytes, last modified: ', 
+			f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+			'</li>');
+		}
+		document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+	}
+
+	function handleDragOver(evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+		evt.dataTransfer.dropEffect = 'copy';
+	}
+
+	var dropZone = document.getElementById('drop_zone');
+	dropZone.addEventListener('dragover', handleDragOver, false);
+	dropZone.addEventListener('drop', handleFileSelect, false);
+</script>
+
+<img src="{{filename}}" style="float:left" hspace=100 vspace=100> 
+{% else %}
+<h1>No image</h1>
+{% endif %}
+{% endblock %}

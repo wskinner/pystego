@@ -1,0 +1,25 @@
+<script type="text/javascript" language="javascript"
+	src="/js/jquery-2.0.3.js"></script>
+<html>
+	<head>
+		{% if title %}
+		<title>{{title}} - Steggy</title>
+		{% else %}
+		<title>Steggy</title>
+		{% endif %}
+	</head>
+	<body>
+		<div>Steggy: <a href='/index'>Home</a></div>
+		<hr>
+		{% with messages = get_flashed_messages() %}
+		{% if messages %}
+		<ul>
+			{% for message in messages %}
+			<li>{{message}}</li>
+			{% endfor %}
+			</ul>
+			{% endif %}
+			{% endwith %}
+		{% block content %}{% endblock %}
+	</body>
+</html>

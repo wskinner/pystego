@@ -1,0 +1,20 @@
+<h1>A script for encoding messages in images.</h1>
+
+<h2>Usage</h2>
+
+<p>./steg [-d | -v | -h] [-o outputfile] [-i inputfile] [msg] filename
+<code>bash
+    bash-3.2$ echo "super secret message" &gt; msg.txt
+    bash-3.2$ cat msg.txt | ./steg.py kitty.png
+    bash-3.2$ ls
+    kitty-enc.png kitty.png msg.txt   steg.py
+    bash-3.2$ ./steg.py -d kitty-enc.png
+    super secret message
+    bash-3.2$
+</code></p>
+
+<h2>Notes</h2>
+
+<p>This is obiously not at all secure... if you want security, encrypt the data before
+encoding it in the image. 
+Currently, only uncompressed formats like PNG are supported.</p>
